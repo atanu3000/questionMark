@@ -1,4 +1,5 @@
 import {
+  ActivityIndicator,
   Dimensions,
   ScrollView,
   StyleSheet,
@@ -15,43 +16,31 @@ import Markdown from 'react-native-markdown-display';
 // API specific imports
 import {GoogleGenerativeAI} from '@google/generative-ai';
 import {API_KEY} from '../../API'; // set up your API key at root directory
+import {markdownStyle} from '../maekdownStyle';
+import ResponseView from '../Components/ResponseView';
 
 const TextSearch = () => {
-  const [query, setQuery] = useState('');
-  const [response, setResponse] = useState('');
+  const [query, setQuery] = useState<string>('');
+  const [response, setResponse] = useState<string>('');
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const genAI = new GoogleGenerativeAI(API_KEY);
 
-  async function getResponse() {
+  const getResponse = async () => {
     setResponse('');
-    const model = genAI.getGenerativeModel({model: 'gemini-pro'});
-    const result = await model.generateContent(query);
-    const response = result.response;
-    setResponse(response.text());
-  }
+    setIsLoading(true);
 
-  const markdownStyle: {[key: string]: TextStyle} = {
-    heading1: {
-      color: 'blue',
-    },
-    heading2: {
-      color: 'green',
-    },
-    heading3: {
-      color: 'red',
-    },
-    strong: {
-      fontWeight: 'bold',
-    },
-    em: {
-      fontStyle: 'italic',
-    },
-    link: {
-      color: 'purple',
-    },
-    text: {
-      color: '#000',
-    },
+    try {
+      const model = genAI.getGenerativeModel({model: 'gemini-pro'});
+      const result = await model.generateContent(query);
+      const response = result.response;
+
+      setResponse(response.text());
+    } catch (error) {
+      console.error('An error occurred:', error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -71,22 +60,11 @@ const TextSearch = () => {
           </Text>
         </TouchableOpacity>
       </View>
-      <ScrollView contentContainerStyle={styles.responseContainer}>
-        {response && (
-          <>
-            <Markdown style={markdownStyle}>{response}</Markdown>
-            <View style={{alignItems: 'center'}}>
-              <TouchableOpacity style={styles.regenerate} onPress={getResponse}>
-                <Text>
-                  <Icon name="arrows-rotate" color={'#FFFFFF'} size={18} />
-                  {'  '}
-                  Regenerate Response
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </>
-        )}
-      </ScrollView>
+      <ResponseView
+        isLoading={isLoading}
+        response={response}
+        getResponse={getResponse}
+      />
     </View>
   );
 };
@@ -122,18 +100,5 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     paddingHorizontal: 11,
     borderRadius: 50,
-  },
-  responseContainer: {
-    paddingHorizontal: 12,
-    paddingBottom: 30,
-  },
-  regenerate: {
-    alignItems: 'center',
-    gap: 10,
-    backgroundColor: '#ef8585',
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-    borderRadius: 30,
-    marginTop: 20,
   },
 });
