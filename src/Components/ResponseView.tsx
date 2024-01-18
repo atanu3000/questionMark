@@ -8,7 +8,7 @@ import {
 } from 'react-native';
 import React from 'react';
 import Markdown from 'react-native-markdown-display';
-import {markdownStyle} from '../maekdownStyle';
+import {markdownStyle} from '../markdownStyle';
 import Icon from 'react-native-vector-icons/FontAwesome6';
 
 interface ResponseViewProps {
@@ -23,7 +23,7 @@ const ResponseView: React.FC<ResponseViewProps> = ({
   getResponse,
 }) => {
   return (
-    <ScrollView contentContainerStyle={styles.responseContainer}>
+    <ScrollView style={styles.responseContainer}>
       {isLoading === true ? (
         <ActivityIndicator
           style={{paddingTop: 50}}
@@ -52,7 +52,7 @@ export default ResponseView;
 const styles = StyleSheet.create({
   responseContainer: {
     paddingHorizontal: 12,
-    paddingBottom: 30,
+    paddingBottom: 300,
   },
   regenerate: {
     flexDirection: 'row',

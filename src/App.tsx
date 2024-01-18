@@ -1,6 +1,5 @@
 import {StatusBar, StyleSheet, Text, View} from 'react-native';
 import React from 'react';
-import Icon from 'react-native-vector-icons/FontAwesome6';
 
 //navigation
 import {NavigationContainer} from '@react-navigation/native';

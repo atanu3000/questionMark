@@ -1,22 +1,17 @@
 import {
-  ActivityIndicator,
   Dimensions,
-  ScrollView,
   StyleSheet,
   Text,
   TextInput,
-  TextStyle,
   TouchableOpacity,
   View,
 } from 'react-native';
 import React, {useState} from 'react';
 import Icon from 'react-native-vector-icons/FontAwesome6';
-import Markdown from 'react-native-markdown-display';
 
 // API specific imports
 import {GoogleGenerativeAI} from '@google/generative-ai';
 import {API_KEY} from '../../API'; // set up your API key at root directory
-import {markdownStyle} from '../maekdownStyle';
 import ResponseView from '../Components/ResponseView';
 
 const TextSearch = () => {
@@ -74,7 +69,6 @@ export default TextSearch;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    // alignItems: 'center',
     justifyContent: 'center',
     height: Dimensions.get('window').height - 94,
     paddingBottom: 10,

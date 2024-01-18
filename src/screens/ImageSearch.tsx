@@ -9,18 +9,16 @@ import {
   StyleSheet,
   TextInput,
   ScrollView,
-  ActivityIndicator,
 } from 'react-native';
 import ImagePicker, {Image as ImageType} from 'react-native-image-crop-picker';
 import Icon from 'react-native-vector-icons/FontAwesome6';
 import RNFS from 'react-native-fs';
-import Markdown from 'react-native-markdown-display';
-import {markdownStyle} from '../maekdownStyle';
 
 // API specific imports
 import {GoogleGenerativeAI} from '@google/generative-ai';
 import {API_KEY} from '../../API'; // set up your API key at root directory
 import ResponseView from '../Components/ResponseView';
+import Snackbar from 'react-native-snackbar';
 
 const ImageSearch: React.FC = () => {
   const [selectedImages, setSelectedImages] = useState<ImageType[]>([]);
@@ -38,7 +36,16 @@ const ImageSearch: React.FC = () => {
       mediaType: 'photo',
     })
       .then(images => {
+        if (images.length > 2) {
+          return Snackbar.show({
+            text: 'Maximum 2 images allowed for Vision',
+            duration: Snackbar.LENGTH_LONG,  // Ensure Snackbar.LENGTH_LONG is available
+            backgroundColor: '#D24545',
+          });
+      }
         setSelectedImages(images);
+        console.log(selectedImages.length);
+
       })
       .catch(error => {
         console.log('ImagePicker Error: ', error);
@@ -61,9 +68,11 @@ const ImageSearch: React.FC = () => {
     }
   }
 
+  
   const getResponse = async () => {
     setResponse('');
     setIsLoading(true);
+    
     try {
       const model = genAI.getGenerativeModel({model: 'gemini-pro-vision'});
       const imageParts: GenerativePart[] = [];
@@ -81,6 +90,12 @@ const ImageSearch: React.FC = () => {
       setResponse(response.text());
     } catch (error) {
       console.error('An error occurred:', error);
+      setSelectedImages([]);
+      return Snackbar.show({
+        text: "This image is not compatible. Please try another!",
+        duration: Snackbar.LENGTH_LONG,  // Ensure Snackbar.LENGTH_LONG is available
+        backgroundColor: '#D24545',
+      })
     } finally {
       setIsLoading(false);
     }
@@ -97,40 +112,46 @@ const ImageSearch: React.FC = () => {
           </TouchableOpacity>
         </View>
       ) : (
-        <>
-          <FlatList
-            data={selectedImages}
-            numColumns={2}
-            keyExtractor={(item, index) => index.toString()}
-            renderItem={({item}) => (
-              <Image
-                source={{uri: item.path}}
-                style={{width: width / 2 - 10, height: 130, margin: 5}}
-              />
-            )}
-            horizontal={false}
-          />
-          <View style={styles.searchContainer}>
-            <TextInput
-              style={styles.inputStyle}
-              value={query}
-              onChangeText={setQuery}
-              placeholder="Ask me any question..."
-              autoCorrect={false} // Disable auto-correction
-              spellCheck={false} // Disable spell-check
+        selectImages.length <= 4 && (
+          <>
+            {/* {selectImages.length <= 4 ? () : ()} */}
+            <FlatList
+              data={selectedImages}
+              numColumns={2}
+              keyExtractor={(item, index) => index.toString()}
+              contentContainerStyle={selectedImages.length === 1 && {alignItems: 'center'}}
+              renderItem={({item}) => (
+                <Image
+                  source={{uri: item.path}}
+                  style={[{width: width / 2 - 10, height: 130, margin: 5}]}
+                />
+              )}
+              horizontal={false}
             />
-            <TouchableOpacity onPress={getResponse} style={styles.buttonStyle}>
-              <Text>
-                <Icon name="arrow-up" color={'#FFFFFF'} size={20} />
-              </Text>
-            </TouchableOpacity>
-          </View>
-          <ResponseView
-            isLoading={isLoading}
-            response={response}
-            getResponse={getResponse}
-          />
-        </>
+            <View style={styles.searchContainer}>
+              <TextInput
+                style={styles.inputStyle}
+                value={query}
+                onChangeText={setQuery}
+                placeholder="Ask me any question..."
+                autoCorrect={false} // Disable auto-correction
+                spellCheck={false} // Disable spell-check
+              />
+              <TouchableOpacity
+                onPress={getResponse}
+                style={styles.buttonStyle}>
+                <Text>
+                  <Icon name="arrow-up" color={'#FFFFFF'} size={20} />
+                </Text>
+              </TouchableOpacity>
+            </View>
+            <ResponseView
+              isLoading={isLoading}
+              response={response}
+              getResponse={getResponse}
+            />
+          </>
+        )
       )}
     </View>
   );
