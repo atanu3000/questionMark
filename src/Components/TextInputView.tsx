@@ -52,7 +52,7 @@ const TextInputView: React.FC<TextInputViewProps> = ({handleInput, getResponse})
             <TouchableOpacity
               onPress={clearInput}
               style={styles.clearInput}>
-              <Icon name="xmark" color={'#000'} size={24} />
+              <Icon name="xmark" color={'#D24545'} size={24} />
             </TouchableOpacity>
           )}
         </View>

@@ -1,21 +1,41 @@
 import {Dimensions, StyleSheet, View} from 'react-native';
-import React, {useState} from 'react';
-import Icon from 'react-native-vector-icons/FontAwesome6';
+import React, {useEffect, useState} from 'react';
+import NetInfo from '@react-native-community/netinfo';
 
 // API specific imports
 import {GoogleGenerativeAI} from '@google/generative-ai';
 import {API_KEY} from '../../API'; // set up your API key at root directory
 import ResponseView from '../Components/ResponseView';
 import TextInputView from '../Components/TextInputView';
+import Snackbar from 'react-native-snackbar';
 
 const TextSearch = () => {
   const [query, setQuery] = useState<string>('');
   const [response, setResponse] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isConnected, setIsConnected] = useState<boolean | null>(true);
 
   const genAI = new GoogleGenerativeAI(API_KEY);
 
+  useEffect(() => {
+    const checkConnection = NetInfo.addEventListener(state => {
+      setIsConnected(state.isConnected);
+    });
+
+    return () => {
+      checkConnection();
+    };
+  }, []);
+
   const getResponse = async () => {
+    if (!isConnected) {
+      return Snackbar.show({
+        text: 'Please turn on either wifi or data connection and try again.',
+        duration: 5000,
+        backgroundColor: '#D24545',
+      });
+    }
+
     setResponse('');
     setIsLoading(true);
 

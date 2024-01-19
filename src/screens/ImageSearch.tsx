@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   View,
   Text,
@@ -9,13 +9,14 @@ import {
 import ImagePicker, {Image as ImageType} from 'react-native-image-crop-picker';
 import Icon from 'react-native-vector-icons/FontAwesome6';
 import RNFS from 'react-native-fs';
+import Snackbar from 'react-native-snackbar';
+import NetInfo from '@react-native-community/netinfo';
 
 // API specific imports
 import {GoogleGenerativeAI} from '@google/generative-ai';
 import {API_KEY} from '../../API'; // set up your API key at root directory
 
 import ResponseView from '../Components/ResponseView';
-import Snackbar from 'react-native-snackbar';
 import TextInputView from '../Components/TextInputView';
 
 const genAI = new GoogleGenerativeAI(API_KEY);
@@ -25,6 +26,7 @@ const ImageSearch: React.FC = () => {
   const [query, setQuery] = useState<string>('');
   const [response, setResponse] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isConnected, setIsConnected] = useState<boolean | null>(true);
 
   const selectImages = () => {
     ImagePicker.openPicker({
@@ -40,7 +42,7 @@ const ImageSearch: React.FC = () => {
             backgroundColor: '#D24545',
           });
         }
-        setSelectedImages(images);
+        setSelectedImages(images);        
       })
       .catch(error => {
         console.log('ImagePicker Error: ', error);
@@ -63,7 +65,24 @@ const ImageSearch: React.FC = () => {
     }
   }
 
+  useEffect(() => {
+    const checkConnection = NetInfo.addEventListener(state => {
+      setIsConnected(state.isConnected);
+    });
+
+    return () => {
+      checkConnection();
+    };
+  }, []);
+
   const getResponse = async () => {
+    if (!isConnected) {
+      return Snackbar.show({
+        text: 'Please turn on either wifi or data connection and try again.',
+        duration: 5000,
+        backgroundColor: '#D24545',
+      })
+    }
     setResponse('');
     setIsLoading(true);
 
@@ -117,6 +136,7 @@ const ImageSearch: React.FC = () => {
           <ResponseView
             isLoading={isLoading}
             images={selectedImages.map(image => image.path)}
+            changeImage={selectImages}
             response={response}
             getResponse={getResponse}
             clearData={clearData}

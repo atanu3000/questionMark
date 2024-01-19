@@ -31,45 +31,41 @@ const App = () => {
         <Text style={styles.headingText}>Question Mark</Text>
       </View>
       <NavigationContainer>
-        <Tab.Navigator
-          initialRouteName="TextSearch"
-          screenOptions={{
-            tabBarStyle: {backgroundColor: ThemeColor},
-            tabBarActiveTintColor: '#FFFFFF',
-            tabBarInactiveTintColor: '#E6BAA3',
-            tabBarLabelStyle: {
-              fontWeight: '500',
-              fontSize: 15,
-              textTransform: 'capitalize',
-              width: getTabWidth('ImageSearch'),
-            },
-            tabBarIndicatorStyle: {
-              backgroundColor: '#FFFFFF',
-              height: 3,
-            },
-          }}>
-          <Tab.Screen
-            name="TextSearch"
-            component={TextSearch}
-            options={{title: 'Normal'}}
-          />
-          <Tab.Screen
-            name="ImageSearch"
-            component={ImageSearch}
-            options={{title: 'Vision'}}
-          />
-          <Tab.Screen
-            name="About"
-            component={About}
-            options={{
-              title: 'About',
-              // tabBarLabel: () => (
-              //   <Icon name='circle-info' color={'#FFFFFF'} size={24}/>
-              // ),
-              // tabBarItemStyle: {},
-            }}
-          />
-        </Tab.Navigator>
+          <Tab.Navigator
+            initialRouteName="TextSearch"
+            screenOptions={{
+              tabBarStyle: {backgroundColor: ThemeColor},
+              tabBarActiveTintColor: '#FFFFFF',
+              tabBarInactiveTintColor: '#E6BAA3',
+              tabBarLabelStyle: {
+                fontWeight: '500',
+                fontSize: 15,
+                textTransform: 'capitalize',
+                width: getTabWidth('ImageSearch'),
+              },
+              tabBarIndicatorStyle: {
+                backgroundColor: '#FFFFFF',
+                height: 3,
+              },
+            }}>
+            <Tab.Screen
+              name="TextSearch"
+              component={TextSearch}
+              options={{title: 'Normal'}}
+            />
+            <Tab.Screen
+              name="ImageSearch"
+              component={ImageSearch}
+              options={{title: 'Vision'}}
+            />
+            <Tab.Screen
+              name="About"
+              component={About}
+              options={{
+                title: 'About',
+              }}
+            />
+          </Tab.Navigator>
       </NavigationContainer>
     </>
   );

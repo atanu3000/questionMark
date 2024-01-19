@@ -17,6 +17,7 @@ interface ResponseViewProps {
   isLoading: boolean;
   response: string;
   images?: string[];
+  changeImage?: () => void;
   getResponse: () => void;
   clearData?: () => void;
 }
@@ -27,26 +28,38 @@ const ResponseView: React.FC<ResponseViewProps> = ({
   isLoading,
   response,
   images,
+  changeImage,
   getResponse,
   clearData,
 }) => {
   return (
     <ScrollView contentContainerStyle={styles.responseContainer}>
       {images && (
-        <View
-          style={[
-            images.length === 1
-              ? {alignItems: 'center'}
-              : styles.imageContainer,
-          ]}>
-          {images.map(image => (
-            <Image
-              key={image}
-              source={{uri: image}}
-              style={styles.imageStyle}
-            />
-          ))}
-        </View>
+        <>
+          <View
+            style={[
+              images.length === 1
+                ? {alignItems: 'center'}
+                : styles.imageContainer,
+            ]}>
+            {images.map(image => (
+              <Image
+                key={image}
+                source={{uri: image}}
+                style={styles.imageStyle}
+              />
+            ))}
+          </View>
+          {!response && (
+            <View style={styles.chooseAnother}>
+              <TouchableOpacity
+                style={[styles.clear, {marginTop: 15}]}
+                onPress={changeImage}>
+                <Text>Choose another image</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+        </>
       )}
       {isLoading === true ? (
         <ActivityIndicator
@@ -94,6 +107,11 @@ const styles = StyleSheet.create({
     height: 130,
     borderRadius: 10,
   },
+  chooseAnother: {
+    // position: 'absolute',
+    // bottom: 0,
+    alignItems: 'center',
+  },
   btnContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
@@ -112,6 +130,7 @@ const styles = StyleSheet.create({
     borderRadius: 30,
   },
   clear: {
+    alignItems: 'center',
     backgroundColor: '#ef8585',
     paddingVertical: 12,
     paddingHorizontal: 24,
