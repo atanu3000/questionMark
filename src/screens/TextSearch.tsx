@@ -1,11 +1,4 @@
-import {
-  Dimensions,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import {Dimensions, StyleSheet, View} from 'react-native';
 import React, {useState} from 'react';
 import Icon from 'react-native-vector-icons/FontAwesome6';
 
@@ -13,6 +6,7 @@ import Icon from 'react-native-vector-icons/FontAwesome6';
 import {GoogleGenerativeAI} from '@google/generative-ai';
 import {API_KEY} from '../../API'; // set up your API key at root directory
 import ResponseView from '../Components/ResponseView';
+import TextInputView from '../Components/TextInputView';
 
 const TextSearch = () => {
   const [query, setQuery] = useState<string>('');
@@ -40,21 +34,7 @@ const TextSearch = () => {
 
   return (
     <View style={styles.container}>
-      <View style={styles.searchContainer}>
-        <TextInput
-          style={styles.inputStyle}
-          value={query}
-          onChangeText={setQuery}
-          placeholder="Ask me any question..."
-          autoCorrect={false} // Disable auto-correction
-          spellCheck={false} // Disable spell-check
-        />
-        <TouchableOpacity onPress={getResponse} style={styles.buttonStyle}>
-          <Text>
-            <Icon name="arrow-up" color={'#FFFFFF'} size={20} />
-          </Text>
-        </TouchableOpacity>
-      </View>
+      <TextInputView handleInput={setQuery} getResponse={getResponse} />
       <ResponseView
         isLoading={isLoading}
         response={response}
@@ -72,27 +52,5 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     height: Dimensions.get('window').height - 94,
     paddingBottom: 10,
-  },
-  searchContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    marginTop: 4,
-  },
-  inputStyle: {
-    backgroundColor: '#D2454544',
-    color: '#000000',
-    width: '88%',
-    borderRadius: 30,
-    paddingHorizontal: 12,
-    marginRight: 8,
-  },
-  buttonStyle: {
-    backgroundColor: '#ef8585',
-    paddingVertical: 8,
-    paddingHorizontal: 11,
-    borderRadius: 50,
   },
 });
