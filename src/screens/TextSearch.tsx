@@ -68,6 +68,7 @@ export default TextSearch;
 
 const styles = StyleSheet.create({
   container: {
+    backgroundColor: "#FFFFFF",
     flex: 1,
     justifyContent: 'center',
     height: Dimensions.get('window').height - 94,

@@ -5,6 +5,8 @@ import {
   TouchableOpacity,
   StyleSheet,
   TextInput,
+  Dimensions,
+  Alert,
 } from 'react-native';
 import ImagePicker, {Image as ImageType} from 'react-native-image-crop-picker';
 import Icon from 'react-native-vector-icons/FontAwesome6';
@@ -32,6 +34,7 @@ const ImageSearch: React.FC = () => {
     ImagePicker.openPicker({
       multiple: true,
       waitAnimationEnd: false,
+      cropping: true,
       mediaType: 'photo',
     })
       .then(images => {
@@ -42,10 +45,34 @@ const ImageSearch: React.FC = () => {
             backgroundColor: '#D24545',
           });
         }
-        setSelectedImages(images);        
+        setSelectedImages(images);
       })
       .catch(error => {
         console.log('ImagePicker Error: ', error);
+        return Snackbar.show({
+          text: error.message,
+          duration: Snackbar.LENGTH_LONG,
+          backgroundColor: '#D24545',
+        });
+      });
+  };
+
+  const openCamera = () => {
+    ImagePicker.openCamera({
+      width: 300,
+      height: 400,
+      cropping: true,
+    })
+      .then(image => {
+        console.log(image);
+      })
+      .catch(err => {
+        console.log(err);
+        return Snackbar.show({
+          text: err.message,
+          duration: Snackbar.LENGTH_LONG,
+          backgroundColor: '#D24545',
+        });
       });
   };
 
@@ -81,7 +108,7 @@ const ImageSearch: React.FC = () => {
         text: 'Please turn on either wifi or data connection and try again.',
         duration: 5000,
         backgroundColor: '#D24545',
-      })
+      });
     }
     setResponse('');
     setIsLoading(true);
@@ -106,7 +133,7 @@ const ImageSearch: React.FC = () => {
       setSelectedImages([]);
       return Snackbar.show({
         text: 'This image is not compatible. Please try another!',
-        duration: Snackbar.LENGTH_LONG, // Ensure Snackbar.LENGTH_LONG is available
+        duration: 5000, // Ensure Snackbar.LENGTH_LONG is available
         backgroundColor: '#D24545',
       });
     } finally {
@@ -115,19 +142,27 @@ const ImageSearch: React.FC = () => {
   };
 
   const clearData = () => {
-    setResponse('');
-    setQuery('');
-    setSelectedImages([]);
+    ImagePicker.clean()
+      .then(() => {
+        setResponse('');
+        setQuery('');
+        setSelectedImages([]);
+      })
+      .catch();
   };
 
   return (
-    <View>
+    <View style={styles.container}>
       {selectedImages.length === 0 ? (
         <View style={styles.selectImages}>
           <TouchableOpacity
             onPress={selectImages}
             style={styles.selectImagesBtn}>
             <Icon name="plus" color={'#FFFFFF'} size={44} />
+          </TouchableOpacity>
+          <Text>Or</Text>
+          <TouchableOpacity onPress={openCamera} style={styles.selectImagesBtn}>
+            <Icon name="camera" color={'#FFFFFF'} size={44} />
           </TouchableOpacity>
         </View>
       ) : (
@@ -150,9 +185,16 @@ const ImageSearch: React.FC = () => {
 export default ImageSearch;
 
 const styles = StyleSheet.create({
-  selectImages: {
-    marginTop: 100,
+  container: {
+    backgroundColor: '#FFFFFF',
     flex: 1,
+    justifyContent: 'center',
+    height: Dimensions.get('window').height - 94,
+    paddingBottom: 10,
+  },
+  selectImages: {
+    flexDirection: 'row',
+    gap: 20,
     alignItems: 'center',
     justifyContent: 'center',
   },

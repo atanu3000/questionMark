@@ -12,6 +12,7 @@ import React from 'react';
 import Markdown from 'react-native-markdown-display';
 import {markdownStyle} from '../markdownStyle';
 import Icon from 'react-native-vector-icons/FontAwesome6';
+import LottieView from 'lottie-react-native';
 
 interface ResponseViewProps {
   isLoading: boolean;
@@ -33,7 +34,7 @@ const ResponseView: React.FC<ResponseViewProps> = ({
   clearData,
 }) => {
   return (
-    <ScrollView contentContainerStyle={styles.responseContainer}>
+    <ScrollView contentContainerStyle={styles.responseContainer} showsVerticalScrollIndicator={false}>
       {images && (
         <>
           <View
@@ -50,23 +51,36 @@ const ResponseView: React.FC<ResponseViewProps> = ({
               />
             ))}
           </View>
-          {!response && (
+          {!response && !isLoading &&(
             <View style={styles.chooseAnother}>
               <TouchableOpacity
                 style={[styles.clear, {marginTop: 15}]}
                 onPress={changeImage}>
-                <Text>Choose another image</Text>
+                <Text style={{fontWeight: '500'}}>Choose another image</Text>
               </TouchableOpacity>
             </View>
           )}
         </>
       )}
       {isLoading === true ? (
-        <ActivityIndicator
-          style={{paddingTop: 50}}
-          size="large"
-          color="#ef8585"
-        />
+        // <ActivityIndicator
+        //   style={{paddingTop: 50}}
+        //   size="large"
+        //   color="#ef8585"
+        // />
+        <View style={{alignItems: 'center'}}>
+          <LottieView
+            source={require('../assets/skeleton frame.json')}
+            style={{width: '100%', height: 300}}
+            autoPlay
+            loop
+          /><LottieView
+            source={require('../assets/skeleton frame.json')}
+            style={{width: '100%', height: 300}}
+            autoPlay
+            loop
+          />
+        </View>
       ) : (
         response && (
           <>
