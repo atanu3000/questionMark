@@ -171,7 +171,6 @@ const ImageSearch: React.FC = () => {
           <ResponseView
             isLoading={isLoading}
             images={selectedImages.map(image => image.path)}
-            changeImage={selectImages}
             response={response}
             getResponse={getResponse}
             clearData={clearData}

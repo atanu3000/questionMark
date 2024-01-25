@@ -18,7 +18,6 @@ interface ResponseViewProps {
   isLoading: boolean;
   response: string;
   images?: string[];
-  changeImage?: () => void;
   getResponse: () => void;
   clearData?: () => void;
 }
@@ -29,7 +28,6 @@ const ResponseView: React.FC<ResponseViewProps> = ({
   isLoading,
   response,
   images,
-  changeImage,
   getResponse,
   clearData,
 }) => {
@@ -55,7 +53,7 @@ const ResponseView: React.FC<ResponseViewProps> = ({
             <View style={styles.chooseAnother}>
               <TouchableOpacity
                 style={[styles.clear, {marginTop: 15}]}
-                onPress={changeImage}>
+                onPress={clearData}>
                 <Text style={{fontWeight: '500'}}>Choose another image</Text>
               </TouchableOpacity>
             </View>
@@ -63,11 +61,6 @@ const ResponseView: React.FC<ResponseViewProps> = ({
         </>
       )}
       {isLoading === true ? (
-        // <ActivityIndicator
-        //   style={{paddingTop: 50}}
-        //   size="large"
-        //   color="#ef8585"
-        // />
         <View style={{alignItems: 'center'}}>
           <LottieView
             source={require('../assets/skeleton frame.json')}
