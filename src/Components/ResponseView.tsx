@@ -57,7 +57,7 @@ const ResponseView: React.FC<ResponseViewProps> = ({
   const handleCopy = () => {
     Clipboard.setString(selectedText);
     setSelectedText('');
-    handleClose;
+    handleClose();
     return Snackbar.show({
       text: 'AI response copied to clipboard',
       backgroundColor: '#D24545',
@@ -69,7 +69,7 @@ const ResponseView: React.FC<ResponseViewProps> = ({
     Share.share({
       message: selectedText,
     });
-    handleClose;
+    handleClose();
   };
 
   const handleClose = () => {

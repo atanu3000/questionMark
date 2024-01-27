@@ -58,7 +58,7 @@ const TextSearch = () => {
       <ResponseView
         isLoading={isLoading}
         response={response}
-        getResponse={getResponse}
+        getResponse={query.trim().length === 0 ? () => null : getResponse}
       />
     </View>
   );
