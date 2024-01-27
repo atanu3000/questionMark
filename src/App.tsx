@@ -44,8 +44,7 @@ const App = () => {
         {
           text: 'Yes',
           onPress: () => {
-            BackHandler.exitApp(),
-            setIsLoading(true);
+            BackHandler.exitApp(), setIsLoading(true);
           },
         },
       ]);
@@ -58,7 +57,6 @@ const App = () => {
     );
 
     return () => {
-      
       backHandler.remove();
     };
   }, []);
@@ -73,7 +71,6 @@ const App = () => {
           <View style={styles.container}>
             <Text style={styles.headingText}>Question Mark</Text>
           </View>
-
           <NavigationContainer>
             <Tab.Navigator
               initialRouteName="TextSearch"

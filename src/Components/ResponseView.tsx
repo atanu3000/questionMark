@@ -1,7 +1,9 @@
 import {
   Dimensions,
   Image,
+  Pressable,
   ScrollView,
+  Share,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -12,6 +14,15 @@ import Markdown from 'react-native-markdown-display';
 import {markdownStyle} from '../markdownStyle';
 import Icon from 'react-native-vector-icons/FontAwesome6';
 import LottieView from 'lottie-react-native';
+import {
+  Menu,
+  MenuOption,
+  MenuOptions,
+  MenuProvider,
+  MenuTrigger,
+} from 'react-native-popup-menu';
+import Clipboard from '@react-native-clipboard/clipboard';
+import Snackbar from 'react-native-snackbar';
 
 interface ResponseViewProps {
   isLoading: boolean;
@@ -31,7 +42,40 @@ const ResponseView: React.FC<ResponseViewProps> = ({
   clearData,
 }) => {
   const scrollViewRef = useRef<ScrollView>();
-  const [showGoToBottomButton, setShowGoToBottomButton] = useState<boolean>(false);
+  const menuRef = useRef<Menu>(null);
+  const [showGoToBottomButton, setShowGoToBottomButton] =
+    useState<boolean>(false);
+  const [selectedText, setSelectedText] = useState<string>('');
+  const [isMenuVisible, setIsMenuVisible] = useState<boolean>(false);
+
+  const handleLongPress = (text: string) => {
+    setSelectedText(text.replace(/\*\*/g, '*'));
+    setIsMenuVisible(true);
+    menuRef.current?.open();
+  };
+
+  const handleCopy = () => {
+    Clipboard.setString(selectedText);
+    setSelectedText('');
+    handleClose;
+    return Snackbar.show({
+      text: 'AI response copied to clipboard',
+      backgroundColor: '#D24545',
+      duration: Snackbar.LENGTH_LONG,
+    });
+  };
+
+  const handleShare = () => {
+    Share.share({
+      message: selectedText,
+    });
+    handleClose;
+  };
+
+  const handleClose = () => {
+    setIsMenuVisible(false);
+    menuRef.current?.close();
+  };
 
   const handleScroll = (event: {
     nativeEvent: {
@@ -45,7 +89,8 @@ const ResponseView: React.FC<ResponseViewProps> = ({
     const contentHeight = event.nativeEvent.contentSize.height;
 
     const threshold = 150;
-    const isCloseToBottom = contentHeight - screenHeight - scrollPosition < threshold;
+    const isCloseToBottom =
+      contentHeight - screenHeight - scrollPosition < threshold;
 
     setShowGoToBottomButton(!isCloseToBottom);
   };
@@ -106,7 +151,9 @@ const ResponseView: React.FC<ResponseViewProps> = ({
         ) : (
           response && (
             <>
-              <Markdown style={markdownStyle}>{response}</Markdown>
+              <Pressable onLongPress={() => handleLongPress(response)}>
+                <Markdown style={markdownStyle}>{response}</Markdown>
+              </Pressable>
               <View style={styles.btnContainer}>
                 <TouchableOpacity
                   style={styles.regenerate}
@@ -130,6 +177,46 @@ const ResponseView: React.FC<ResponseViewProps> = ({
           onPress={handleGoToBottom}>
           <Icon name="angles-down" color={'#FFF'} size={16} />
         </TouchableOpacity>
+      )}
+
+      {isMenuVisible && (
+        <View style={styles.menuProvider}>
+          <MenuProvider>
+            <Menu ref={menuRef}>
+              <MenuTrigger />
+              <MenuOptions
+                customStyles={{
+                  optionsContainer: {height: 170, borderRadius: 15},
+                }}>
+                <View style={styles.optionContainer}>
+                  <MenuOption onSelect={handleCopy}>
+                    <View style={styles.options}>
+                      <Icon name="copy" color={'#fff'} size={22} />
+                      <Text style={{color: '#fff', fontSize: 16}}>Copy</Text>
+                    </View>
+                  </MenuOption>
+                  <MenuOption onSelect={handleShare}>
+                    <View style={[styles.options, {paddingBottom: 5}]}>
+                      <Icon
+                        name="arrow-up-from-bracket"
+                        color={'#fff'}
+                        size={22}
+                      />
+                      <Text style={{color: '#fff', fontSize: 16}}>Share</Text>
+                    </View>
+                  </MenuOption>
+                  <View style={{backgroundColor: '#fff', height: 1.5}}></View>
+                  <MenuOption onSelect={handleClose}>
+                    <View style={styles.options}>
+                      <Icon name="xmark" color={'#fff'} size={22} />
+                      <Text style={{color: '#fff', fontSize: 16}}>Close</Text>
+                    </View>
+                  </MenuOption>
+                </View>
+              </MenuOptions>
+            </Menu>
+          </MenuProvider>
+        </View>
       )}
     </View>
   );
@@ -183,6 +270,27 @@ const styles = StyleSheet.create({
   regenerateText: {
     paddingBottom: 2,
     fontWeight: '500',
+  },
+  menuProvider: {
+    backgroundColor: 'transparent',
+    position: 'absolute',
+    width: 200,
+    height: 170,
+    left: 30,
+    bottom: 70,
+    borderRadius: 10,
+    overflow: 'hidden',
+  },
+  optionContainer: {
+    backgroundColor: '#da6e6e',
+    height: '100%',
+    padding: 14,
+    justifyContent: 'space-around',
+  },
+  options: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
   },
   goToBottomButton: {
     position: 'absolute',
