@@ -47,6 +47,7 @@ const TextSearch = () => {
       setResponse(response.text());
     } catch (error) {
       console.error('An error occurred:', error);
+      setResponse(` ### **This content may violate our content policy.** `)
     } finally {
       setIsLoading(false);
     }
