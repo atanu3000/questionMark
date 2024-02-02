@@ -8,6 +8,7 @@ import {API_KEY} from '../../API'; // set up your API key at root directory
 import ResponseView from '../Components/ResponseView';
 import TextInputView from '../Components/TextInputView';
 import Snackbar from 'react-native-snackbar';
+import {saveData} from '../App';
 
 const TextSearch = () => {
   const [query, setQuery] = useState<string>('');
@@ -45,9 +46,10 @@ const TextSearch = () => {
       const response = result.response;
 
       setResponse(response.text());
+      saveData(query, response.text());
     } catch (error) {
       console.error('An error occurred:', error);
-      setResponse(` ### **This content may violate our content policy.** `)
+      setResponse(` ### **This content may violate our content policy.** `);
     } finally {
       setIsLoading(false);
     }
@@ -69,7 +71,7 @@ export default TextSearch;
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: '#FFFFFF',
     flex: 1,
     justifyContent: 'center',
     height: Dimensions.get('window').height - 94,
