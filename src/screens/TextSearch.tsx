@@ -8,7 +8,7 @@ import {API_KEY} from '../../API'; // set up your API key at root directory
 import ResponseView from '../Components/ResponseView';
 import TextInputView from '../Components/TextInputView';
 import Snackbar from 'react-native-snackbar';
-import {saveData} from '../App';
+import {saveData} from '../Components/NavigationView';
 
 const TextSearch = () => {
   const [query, setQuery] = useState<string>('');
