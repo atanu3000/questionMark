@@ -27,25 +27,17 @@ interface QueryResponse {
 export const saveData = async (query: string, response: string) => {
   try {
     const existingData = await AsyncStorage.getItem('questionMark app data');
-    let existingQueryResponses: QueryResponse[] = [];
-
-    if (existingData) {
-      existingQueryResponses = JSON.parse(existingData);
-
-      if (!Array.isArray(existingQueryResponses)) {
-        existingQueryResponses = [];
-      }
-    }
+    let existingQueryResponses: QueryResponse[] = existingData
+      ? JSON.parse(existingData)
+      : [];
 
     const existingQueryIndex = existingQueryResponses.findIndex(
       item => item.query === query,
     );
 
-    if (existingQueryIndex !== -1) {
-      existingQueryResponses[existingQueryIndex].responses.push(response);
-    } else {
-      existingQueryResponses.push({query, responses: [response]});
-    }
+    existingQueryIndex !== -1
+      ? existingQueryResponses[existingQueryIndex].responses.push(response)
+      : existingQueryResponses.push({query, responses: [response]});
 
     await AsyncStorage.setItem(
       'questionMark app data',
@@ -64,6 +56,7 @@ const NavigationView: React.FC<NavigationViewProps> = ({drawerRef}) => {
   const [data, setData] = useState<QueryResponse[]>([]);
   const menuRef = useRef<Menu>(null);
   const [isMenuVisible, setIsMenuVisible] = useState<boolean>(false);
+  const [selectedQuery, setSelectedquery] = useState<string>('');
   const [sharableContent, setSharableContent] = useState<string>('');
 
   // Retrieve data from AsyncStorage
@@ -75,17 +68,17 @@ const NavigationView: React.FC<NavigationViewProps> = ({drawerRef}) => {
   };
 
   useEffect(() => {
-    const fetch = async () => {
+    const intervalId = setInterval(async () => {
       const data = await fetchData();
       setData(data);
-    };
-    const intervalId = setInterval(fetch, 5000);
+    }, 5000);
     return () => clearInterval(intervalId);
   }, []);
 
   const handleLongPress = (item: QueryResponse) => {
     const content =
-      item.query + '\n\n' + item.responses.join('\n\n● ').replace(/\*\*/g, '*');
+      '*'+item.query+'*' + '\n\n' + item.responses.join('\n\n● ').replace(/\*\*/g, '*');
+    setSelectedquery(item.query);
     setSharableContent(content);
     setIsMenuVisible(true);
     menuRef.current?.open();
@@ -103,7 +96,33 @@ const NavigationView: React.FC<NavigationViewProps> = ({drawerRef}) => {
     menuRef.current?.close();
   };
 
-  const handleDelete = () => {};
+  const handleDelete = async () => {
+    try {
+      const existingData = await AsyncStorage.getItem('questionMark app data');
+
+      const existingQueryResponses = existingData
+        ? JSON.parse(existingData)
+        : [];
+
+      const indexToDelete = existingQueryResponses.findIndex(
+        (item: QueryResponse) => item.query === selectedQuery,
+      );
+
+      if (indexToDelete !== -1) {
+        existingQueryResponses.splice(indexToDelete, 1);
+        await AsyncStorage.setItem(
+          'questionMark app data',
+          JSON.stringify(existingQueryResponses),
+        );
+      }
+    } catch (error) {
+      console.error('Error deleting item:', error);
+    } finally {
+      handleClose();
+      let data  = await fetchData();
+      setData(data);
+    }
+  };
 
   return (
     <View>
