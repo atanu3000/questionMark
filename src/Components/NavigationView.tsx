@@ -1,9 +1,12 @@
 import {
+  Alert,
   DrawerLayoutAndroid,
   FlatList,
+  Modal,
   Share,
   StyleSheet,
   Text,
+  ToastAndroid,
   TouchableOpacity,
   View,
 } from 'react-native';
@@ -17,8 +20,9 @@ import {
   MenuProvider,
   MenuTrigger,
 } from 'react-native-popup-menu';
+import PreviewScreen from '../screens/PreviewScreen';
 
-interface QueryResponse {
+export interface QueryResponse {
   query: string;
   responses: string[];
 }
@@ -58,6 +62,9 @@ const NavigationView: React.FC<NavigationViewProps> = ({drawerRef}) => {
   const [isMenuVisible, setIsMenuVisible] = useState<boolean>(false);
   const [selectedQuery, setSelectedquery] = useState<string>('');
   const [sharableContent, setSharableContent] = useState<string>('');
+  const [isPreviewModalVisible, setPreviewModalVisible] = useState<boolean>(false);
+  const [selectedContent, setSelectedContent] = useState<QueryResponse>();
+  const [isDeleteModalVisible, setDeleteModalVisible] = useState<boolean>(false);
 
   // Retrieve data from AsyncStorage
   const fetchData = async (): Promise<QueryResponse[]> => {
@@ -76,8 +83,8 @@ const NavigationView: React.FC<NavigationViewProps> = ({drawerRef}) => {
   }, []);
 
   const handleLongPress = (item: QueryResponse) => {
-    const content =
-      '*'+item.query+'*' + '\n\n' + item.responses.join('\n\n● ').replace(/\*\*/g, '*');
+    const content = item.query + '\n\n' + item.responses.join('\n\n\n ').replace(/\*\*/g, '*');
+    setSelectedContent(item);
     setSelectedquery(item.query);
     setSharableContent(content);
     setIsMenuVisible(true);
@@ -118,10 +125,67 @@ const NavigationView: React.FC<NavigationViewProps> = ({drawerRef}) => {
     } catch (error) {
       console.error('Error deleting item:', error);
     } finally {
+      ToastAndroid.show('Deleted succesfully', ToastAndroid.SHORT)
       handleClose();
-      let data  = await fetchData();
+      let data = await fetchData();
       setData(data);
     }
+  };
+
+  const handleDeleteAll = async () => {
+    Alert.alert(
+      'Confirm Deletion',
+      'Are you sure you want to delete all the recents?',
+      [
+        {
+          text: 'Cancel',
+          onPress: () => handleClose(),
+          style: 'cancel',
+        },
+        {
+          text: 'Delete',
+          onPress: async () => {
+            try {
+              await AsyncStorage.clear();
+            } catch (error) {
+              ToastAndroid.show('Some error occured', ToastAndroid.SHORT)
+            } finally {
+              ToastAndroid.show('All Recents cleared', ToastAndroid.SHORT)
+              handleClose();
+              let data = await fetchData();
+              setData(data);
+            }
+          },
+          style: 'destructive',
+        },
+      ],
+      { cancelable: false }
+    );
+  }
+
+  const handleDeleteAlert = () => {
+    Alert.alert(
+      'Confirm Deletion',
+      'Are you sure you want to delete this item?',
+      [
+        {
+          text: 'Cancel',
+          onPress: () => handleClose(),
+          style: 'cancel',
+        },
+        {
+          text: 'Delete',
+          onPress: () => {handleDelete()},
+          style: 'destructive',
+        },
+      ],
+      { cancelable: false }
+    );
+  }
+
+  const handlePreviewButtonClick = () => {
+    setPreviewModalVisible(true);
+    handleClose();
   };
 
   return (
@@ -136,18 +200,30 @@ const NavigationView: React.FC<NavigationViewProps> = ({drawerRef}) => {
       </View>
       <FlatList
         data={data}
+        contentContainerStyle={{paddingBottom: 100}}
         renderItem={({item}: {item: QueryResponse}) => (
           <TouchableOpacity onLongPress={() => handleLongPress(item)}>
             <View style={{padding: 10}}>
               <Text style={styles.queryStyle}>
-                {item.query.split('').slice(0, 40)}
-                {item.query.length > 40 && '...'} ({item.responses.length})
+                {item.query.split('').slice(0, 52)}
+                {item.query.length > 52 && '...'}{' '}
+                {item.responses.length > 1 && '(' + item.responses.length + ')'}
               </Text>
             </View>
           </TouchableOpacity>
         )}
         keyExtractor={item => item.query}
+        showsVerticalScrollIndicator={false}
       />
+
+      <Modal
+        visible={isPreviewModalVisible}
+        onRequestClose={() => setPreviewModalVisible(false)}>
+        <PreviewScreen
+          onClose={() => setPreviewModalVisible(false)}
+          content={selectedContent}
+        />
+      </Modal>
 
       {isMenuVisible && (
         <View style={styles.menuContainer}>
@@ -166,13 +242,25 @@ const NavigationView: React.FC<NavigationViewProps> = ({drawerRef}) => {
                       <Text style={{color: '#555', fontSize: 16}}>Share</Text>
                     </View>
                   </MenuOption>
-                  <MenuOption onSelect={handleDelete}>
+                  <MenuOption onSelect={handlePreviewButtonClick}>
+                    <View style={styles.options}>
+                      <Icon name="file-lines" color={'#555'} size={22} />
+                      <Text style={{color: '#555', fontSize: 16}}>Preview</Text>
+                    </View>
+                  </MenuOption>
+                  <MenuOption onSelect={handleDeleteAlert}>
                     <View style={[styles.options, {paddingBottom: 8}]}>
-                      <Icon name="trash" color={'#555'} size={22} />
+                      <Icon name="trash-can" color={'#555'} size={22} />
                       <Text style={{color: '#555', fontSize: 16}}>Delete</Text>
                     </View>
                   </MenuOption>
                   <View style={{backgroundColor: '#555', height: 1.5}}></View>
+                  <MenuOption onSelect={handleDeleteAll}>
+                    <View style={styles.options}>
+                      <Icon name="eraser" color={'#555'} size={22} />
+                      <Text style={{color: '#555', fontSize: 16}}>Clear All</Text>
+                    </View>
+                  </MenuOption>
                   <MenuOption onSelect={handleClose}>
                     <View style={styles.options}>
                       <Icon name="xmark" color={'#555'} size={22} />
@@ -222,7 +310,7 @@ const styles = StyleSheet.create({
     top: 68,
     backgroundColor: 'transparent',
     width: 150,
-    height: 160,
+    height: 245,
     borderRadius: 5,
     overflow: 'hidden',
   },
