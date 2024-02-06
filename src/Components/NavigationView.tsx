@@ -21,14 +21,16 @@ import {
   MenuTrigger,
 } from 'react-native-popup-menu';
 import PreviewScreen from '../screens/PreviewScreen';
+import About from '../screens/About';
 
 export interface QueryResponse {
   query: string;
+  imgPath?: string[];
   responses: string[];
 }
 
 // Save data to local storage
-export const saveData = async (query: string, response: string) => {
+export const saveData = async (query: string, response: string, imgPath?: string[]) => {
   try {
     const existingData = await AsyncStorage.getItem('questionMark app data');
     let existingQueryResponses: QueryResponse[] = existingData
@@ -41,7 +43,7 @@ export const saveData = async (query: string, response: string) => {
 
     existingQueryIndex !== -1
       ? existingQueryResponses[existingQueryIndex].responses.push(response)
-      : existingQueryResponses.push({query, responses: [response]});
+      : existingQueryResponses.push({query, imgPath, responses: [response]});
 
     await AsyncStorage.setItem(
       'questionMark app data',
@@ -64,7 +66,7 @@ const NavigationView: React.FC<NavigationViewProps> = ({drawerRef}) => {
   const [sharableContent, setSharableContent] = useState<string>('');
   const [isPreviewModalVisible, setPreviewModalVisible] = useState<boolean>(false);
   const [selectedContent, setSelectedContent] = useState<QueryResponse>();
-  const [isDeleteModalVisible, setDeleteModalVisible] = useState<boolean>(false);
+  const [isAboutModalVisible, setAboutModalVisible] = useState<boolean>(false);
 
   // Retrieve data from AsyncStorage
   const fetchData = async (): Promise<QueryResponse[]> => {
@@ -192,11 +194,18 @@ const NavigationView: React.FC<NavigationViewProps> = ({drawerRef}) => {
     <View>
       <View style={styles.navigationContainer}>
         <Text style={styles.paragraph}>Recents</Text>
-        <TouchableOpacity
-          style={styles.recentBtn}
-          onPress={() => drawerRef.current?.closeDrawer()}>
-          <Icon name="angle-left" size={18} color={'#FFF'} />
-        </TouchableOpacity>
+        <View style={{flexDirection: 'row', gap: 10}}>
+          <TouchableOpacity
+            style={[styles.recentBtn]}
+            onPress={() => setAboutModalVisible(true)}>
+            <Icon name="question" size={18} color={'#FFF'} />
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.recentBtn}
+            onPress={() => drawerRef.current?.closeDrawer()}>
+            <Icon name="angle-left" size={18} color={'#FFF'} />
+          </TouchableOpacity>
+        </View>
       </View>
       <FlatList
         data={data}
@@ -215,6 +224,12 @@ const NavigationView: React.FC<NavigationViewProps> = ({drawerRef}) => {
         keyExtractor={item => item.query}
         showsVerticalScrollIndicator={false}
       />
+
+      <Modal
+        visible={isAboutModalVisible}
+        onRequestClose={() => setAboutModalVisible(false)}>
+          <About />
+      </Modal>
 
       <Modal
         visible={isPreviewModalVisible}
@@ -258,7 +273,9 @@ const NavigationView: React.FC<NavigationViewProps> = ({drawerRef}) => {
                   <MenuOption onSelect={handleDeleteAll}>
                     <View style={styles.options}>
                       <Icon name="eraser" color={'#555'} size={22} />
-                      <Text style={{color: '#555', fontSize: 16}}>Clear All</Text>
+                      <Text style={{color: '#555', fontSize: 16}}>
+                        Clear All
+                      </Text>
                     </View>
                   </MenuOption>
                   <MenuOption onSelect={handleClose}>

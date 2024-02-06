@@ -73,7 +73,7 @@ const App = () => {
       drawerWidth={300}
       drawerPosition={'left'}
       renderNavigationView={() => <NavigationView drawerRef={drawer}/>}>
-      <StatusBar backgroundColor={ThemeColor} />
+      <StatusBar backgroundColor={ThemeColor} barStyle={'default'}/>
       {isLoading ? (
         <SplashScreen setIsLoading={setIsLoading} />
       ) : (
@@ -114,13 +114,6 @@ const App = () => {
                 component={ImageSearch}
                 options={{title: 'Vision'}}
               />
-              {/* <Tab.Screen
-                name="About"
-                component={About}
-                options={{
-                  title: 'About',
-                }}
-              /> */}
             </Tab.Navigator>
           </NavigationContainer>
         </>
