@@ -7,6 +7,8 @@ import {
   TextInput,
   Dimensions,
   Alert,
+  PermissionsAndroid,
+  ToastAndroid,
 } from 'react-native';
 import ImagePicker, {Image as ImageType} from 'react-native-image-crop-picker';
 import Icon from 'react-native-vector-icons/FontAwesome6';
@@ -20,6 +22,7 @@ import {API_KEY} from '../../API'; // set up your API key at root directory
 
 import ResponseView from '../Components/ResponseView';
 import TextInputView from '../Components/TextInputView';
+import { saveData } from '../Components/NavigationView';
 
 const genAI = new GoogleGenerativeAI(API_KEY);
 
@@ -32,6 +35,8 @@ const ImageSearch: React.FC = () => {
 
   const selectImages = () => {
     ImagePicker.openPicker({
+      width: 300,
+      height: 400,
       multiple: true,
       waitAnimationEnd: false,
       cropping: true,
@@ -57,14 +62,15 @@ const ImageSearch: React.FC = () => {
       });
   };
 
-  const openCamera = () => {
+  const openCamera = async () => {
     ImagePicker.openCamera({
       width: 300,
       height: 400,
       cropping: true,
+      mediaType: 'photo',
     })
       .then(image => {
-        console.log(image);
+        setSelectedImages([image]);
       })
       .catch(err => {
         console.log(err);
@@ -88,7 +94,7 @@ const ImageSearch: React.FC = () => {
       };
     } catch (error) {
       console.error('Error reading file:', error);
-      throw error; // Rethrow the error for further handling if needed
+      throw error; 
     }
   }
 
@@ -126,14 +132,15 @@ const ImageSearch: React.FC = () => {
       );
 
       const result = await model.generateContent([query, ...imageParts]);
-      const response = await result.response;
+      const response = result.response;
       setResponse(response.text());
+      saveData(query, response.text(), selectedImages.map(image => image.path))
     } catch (error) {
       console.error('An error occurred:', error);
       setSelectedImages([]);
       return Snackbar.show({
         text: 'This image is not compatible. Please try another!',
-        duration: 5000, // Ensure Snackbar.LENGTH_LONG is available
+        duration: 5000, 
         backgroundColor: '#D24545',
       });
     } finally {
