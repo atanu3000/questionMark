@@ -4,11 +4,7 @@ import {
   Text,
   TouchableOpacity,
   StyleSheet,
-  TextInput,
   Dimensions,
-  Alert,
-  PermissionsAndroid,
-  ToastAndroid,
 } from 'react-native';
 import ImagePicker, {Image as ImageType} from 'react-native-image-crop-picker';
 import Icon from 'react-native-vector-icons/FontAwesome6';
@@ -161,16 +157,20 @@ const ImageSearch: React.FC = () => {
   return (
     <View style={styles.container}>
       {selectedImages.length === 0 ? (
-        <View style={styles.selectImages}>
-          <TouchableOpacity
-            onPress={selectImages}
-            style={styles.selectImagesBtn}>
-            <Icon name="plus" color={'#FFFFFF'} size={44} />
-          </TouchableOpacity>
-          <Text>Or</Text>
-          <TouchableOpacity onPress={openCamera} style={styles.selectImagesBtn}>
-            <Icon name="camera" color={'#FFFFFF'} size={44} />
-          </TouchableOpacity>
+        <View>
+          <View style={styles.selectImages}>
+            <TouchableOpacity
+              onPress={selectImages}
+              style={styles.selectImagesBtn}>
+              <Icon name="plus" color={'#FFFFFF'} size={44} />
+            </TouchableOpacity>
+            <Text>Or</Text>
+            <TouchableOpacity onPress={openCamera} style={styles.selectImagesBtn}>
+              <Icon name="camera" color={'#FFFFFF'} size={44} />
+            </TouchableOpacity>
+          </View>
+          <Text style={{textAlign: 'center', marginTop: 20
+        }}>Please choose images under 2MB for better compatibility</Text>
         </View>
       ) : (
         <>
